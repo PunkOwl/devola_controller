@@ -1,2 +1,2 @@
-# devola_controller
+# Devola Controller
 Mobile App Controller of Devola
