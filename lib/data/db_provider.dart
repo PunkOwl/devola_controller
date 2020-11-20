@@ -45,7 +45,8 @@ class DBProvider {
       CREATE TABLE devola_settings(
         id INTEGER PRIMARY KEY,
         app_version TEXT,
-        devola_addr TEXT
+        devola_addr TEXT,
+        devola_addr_port INTEGER
       )
     ''');
   }
@@ -55,6 +56,7 @@ class DBProvider {
       id: 0,
       appVersion: AppConst.APP_VERSION,
       devolaAddr: '',
+      devolaAddrPort: 0
     );
     try {
       var res = await db.query('devola_settings', where: 'id = ?', whereArgs: [0]);

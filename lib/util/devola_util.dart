@@ -1,4 +1,4 @@
-class DevilaUtils {
+class DevolaUtils {
 
   static String putZero(int time) {
     return (time < 10)? '0$time' : time.toString();
