@@ -1,9 +1,8 @@
 import 'dart:io';
 
-import 'package:devola_controller/app_const.dart';
 import 'package:devola_controller/app_types.dart';
 import 'package:devola_controller/data/settings_bloc.dart';
-import 'package:devola_controller/data/settings_repository.dart';
+import 'package:devola_controller/model/dto/packet_dto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:udp/udp.dart';
@@ -11,9 +10,13 @@ import 'package:udp/udp.dart';
 import '../../language.dart';
 
 class HomeScreen extends StatefulWidget {
+  final SettingsBloc settingsBloc;
+
+  const HomeScreen({Key key, this.settingsBloc}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
-    return _HomeScreenState();
+    return _HomeScreenState(settingsBloc);
   }
 }
 
@@ -21,8 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool _isShowingCamera = true;
   double _scaleFactorValue = 1;
-  final SettingsRepository _settingsRepository = SettingsRepository();
-  SettingsBloc _settingsBloc;
+  final SettingsBloc _settingsBloc;
 
   bool _isReady = false;
   String _ipAddr = '';
@@ -32,9 +34,10 @@ class _HomeScreenState extends State<HomeScreen> {
   UDP _receiver;
   UDP _sender;
 
+  _HomeScreenState(this._settingsBloc);
+
   @override
   void initState() {
-    _settingsBloc = SettingsBloc(settingsRepository: _settingsRepository);
     _settingsBloc.add(GetSettings());
     super.initState();
   }
@@ -50,16 +53,19 @@ class _HomeScreenState extends State<HomeScreen> {
     print(_ipAddr);
     print(_idAddrPort.toString());
     _endpoint = Endpoint.multicast(InternetAddress(_ipAddr), port: Port(_idAddrPort));
-    // _receiver = await UDP.bind(_endpoint);
     _sender = await UDP.bind(Endpoint.any(port: Port(_idAddrPort)));
     setState(() {
       _isReady = true;
     });
   }
   
-  _sendScaleFactor(double data) async {
+  _sendScaleFactor() async {
     print('Sending');
-    _sender.send(data.toString().codeUnits, _endpoint);
+    _sender.send(PacketDto(
+      scaleFactor: _scaleFactorValue,
+      isCameraOn: _isShowingCamera,
+      extra: null
+    ).toRawJson().codeUnits, _endpoint);
   }
 
   @override
@@ -113,9 +119,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   activeColor: Colors.deepOrange,
                   value: _isShowingCamera,
                   onChanged: (value) {
-                    setState(() {
-                      _isShowingCamera = value;
-                    });
+                    if(_isReady) {
+                      _sendScaleFactor();
+                      setState(() {
+                        _isShowingCamera = value;
+                      });
+                    }
                   },
                 ),
               ],
@@ -139,7 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
             max: 1,
             onChanged: (value) {
               if(_isReady) {
-                _sendScaleFactor(value);
+                _sendScaleFactor();
               }
               setState(() {
                 _scaleFactorValue = value;

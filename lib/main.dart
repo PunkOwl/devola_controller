@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:devola_controller/app_types.dart';
+import 'package:devola_controller/data/settings_bloc.dart';
+import 'package:devola_controller/data/settings_repository.dart';
 import 'package:devola_controller/screens/home/home_screen.dart';
 import 'package:devola_controller/screens/settings/settings_screen.dart';
 import 'package:devola_controller/theme/devola_style.dart';
@@ -35,7 +37,15 @@ void main() {
   Bloc.observer = DevolaBlocObserver();
   ExceptionManager.xMan.debugMode = true;
 
-  Widget devolaControllerApp = DevolaControllerApp();
+  final SettingsRepository settingsRepository = SettingsRepository();
+  final SettingsBloc settingsBloc = SettingsBloc(settingsRepository: settingsRepository);
+
+  Widget devolaControllerApp = MultiBlocProvider(
+    providers: [
+      BlocProvider<SettingsBloc>(create: (context) => settingsBloc,)
+    ],
+    child: DevolaControllerApp(),
+  );
 
   runZonedGuarded(
     () => runApp(devolaControllerApp),
@@ -49,13 +59,22 @@ class DevolaControllerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    final settingsBloc = BlocProvider.of<SettingsBloc>(context);
+
+    Widget homeScreen = HomeScreen(
+      settingsBloc: settingsBloc,
+    );
+
     return MaterialApp(
       theme: devolaTheme(),
       initialRoute: AppTypes.SCREEN_HOME,
-      home: HomeScreen(),
+      home: homeScreen,
       routes: {
-        AppTypes.SCREEN_HOME: (context) => HomeScreen(),
-        AppTypes.SCREEN_SETTINGS: (context) => SettingsScreen(),
+        AppTypes.SCREEN_HOME: (context) => homeScreen,
+        AppTypes.SCREEN_SETTINGS: (context) => SettingsScreen(
+          settingsBloc: settingsBloc,
+        ),
       },
     );
   }

@@ -8,27 +8,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SettingsScreen extends StatefulWidget {
+  final SettingsBloc settingsBloc;
+
+  const SettingsScreen({Key key, this.settingsBloc}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
-    return _SettingsScreenState();
+    return _SettingsScreenState(settingsBloc);
   }
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
 
-  final SettingsRepository _settingsRepository = SettingsRepository();
-  SettingsBloc _settingsBloc;
+  final SettingsBloc _settingsBloc;
   DevolaSettingsEntity _settingsEntity;
   TextEditingController _ipAddrController = TextEditingController();
   TextEditingController _portController = TextEditingController();
   String _errorText;
   bool _isLoading = false;
 
+  _SettingsScreenState(this._settingsBloc);
+
   @override
   void initState() {
-    _settingsBloc = SettingsBloc(
-      settingsRepository: _settingsRepository
-    );
     _settingsBloc.add(GetSettings());
     super.initState();
   }
