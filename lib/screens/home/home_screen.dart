@@ -52,11 +52,16 @@ class _HomeScreenState extends State<HomeScreen> {
   _setupConnection() async {
     print(_ipAddr);
     print(_idAddrPort.toString());
-    _endpoint = Endpoint.multicast(InternetAddress(_ipAddr), port: Port(_idAddrPort));
-    _sender = await UDP.bind(Endpoint.any(port: Port(_idAddrPort)));
-    setState(() {
-      _isReady = true;
-    });
+    try {
+      _endpoint = Endpoint.multicast(InternetAddress(_ipAddr), port: Port(_idAddrPort));
+      _sender = await UDP.bind(Endpoint.any());
+      setState(() {
+        _isReady = true;
+      });
+    } catch(ex, stacktrace) {
+      _showError(ex, stacktrace);
+    }
+
   }
   
   _sendScaleFactor() async {
@@ -104,6 +109,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 _ipAddr = state.settings.devolaAddr;
                 _idAddrPort = state.settings.devolaAddrPort;
                 _setupConnection();
+              } else if(state is UpdateSettingsLoaded) {
+                _settingsBloc.add(GetSettings());
               }
             },
             child: SizedBox(height: 10,),
@@ -120,10 +127,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   value: _isShowingCamera,
                   onChanged: (value) {
                     if(_isReady) {
-                      _sendScaleFactor();
                       setState(() {
                         _isShowingCamera = value;
                       });
+                      _sendScaleFactor();
                     }
                   },
                 ),
@@ -158,6 +165,29 @@ class _HomeScreenState extends State<HomeScreen> {
           Divider(color: Colors.black54,),
         ],
       ),
+    );
+  }
+
+  _showError(Exception ex, StackTrace stackTrace) async {
+    await showDialog(
+      barrierColor: Colors.redAccent,
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                child: Text(ex.toString(), style: TextStyle(fontWeight: FontWeight.w700),),
+              ),
+              Divider(),
+              Container(
+                child: Text(stackTrace.toString()),
+              )
+            ],
+          ),
+        );
+      }
     );
   }
 }

@@ -1,6 +1,5 @@
 import 'package:devola_controller/components/devola_button.dart';
 import 'package:devola_controller/data/settings_bloc.dart';
-import 'package:devola_controller/data/settings_repository.dart';
 import 'package:devola_controller/language.dart';
 import 'package:devola_controller/model/entity/devola_settings_entity.dart';
 import 'package:devola_controller/util/devola_util.dart';
@@ -61,11 +60,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       _ipAddrController.text = state.settings.devolaAddr;
                       _portController.text = state.settings.devolaAddrPort.toString();
                     });
-                  } if(state is GetSettingsLoading) {
+                  } else if(state is GetSettingsLoading) {
                     setState(() {
                       _isLoading = true;
                     });
-                  } if(state is GetSettingsError) {
+                  } else if(state is GetSettingsError) {
+                    setState(() {
+                      _isLoading = false;
+                      _errorText = state.error;
+                    });
+                  } else if(state is UpdateSettingsLoading) {
+                    setState(() {
+                      _isLoading = true;
+                    });
+                  } else if(state is UpdateSettingsLoaded) {
+                    setState(() {
+                      _isLoading = false;
+                    });
+                    DevolaUtils.showDialog(Language.DESC_SETTINGS_SAVED);
+                  } else if(state is UpdateSettingsError) {
                     setState(() {
                       _isLoading = false;
                       _errorText = state.error;

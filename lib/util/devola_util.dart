@@ -1,4 +1,18 @@
+import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+
 class DevolaUtils {
+
+  static showDialog(text) {
+    Fluttertoast.showToast(
+        msg: text,
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Colors.deepOrange,
+        textColor: Colors.white,
+        fontSize: 16.0
+    );
+  }
 
   static String putZero(int time) {
     return (time < 10)? '0$time' : time.toString();

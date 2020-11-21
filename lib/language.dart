@@ -14,4 +14,6 @@ class Language {
   static const LABEL_SHOW_CAMERA = 'Камер харуулах эсэх';
   static const LABEL_SCALE_FACTOR = 'Камерны хэмжээ';
 
+  static const DESC_SETTINGS_SAVED = 'Тохиргоо хадгалагдлаа';
+
 }
